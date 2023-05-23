@@ -1,0 +1,148 @@
+@font-face {
+    font-family: 'kenvector_future';
+    src: url(/font/kenvector_future.ttf);
+}
+
+html,
+body {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    font-family: 'kenvector_future';
+    color: #fff;
+    background-color: #161420;
+    overflow: hidden;
+}
+body div.ui {
+    display: none;
+}
+.cp {
+    cursor: pointer;
+}
+
+/************************************************/
+.loading {
+    text-align: center;
+    position: absolute;
+    top: 40%;
+    width: 100%;
+    font-size: 2.4em;
+}
+.bg {
+    width: 100%;
+    height: 999999%;
+    background: url(img/UI/Main_Menu/BG.png);
+    position: fixed;
+    z-index: 0;
+    background-size: 100%;
+    animation: backgroundMove 100000s linear infinite;
+}
+@keyframes backgroundMove {
+    0% {
+        background-position: 0 center;
+    }
+    100% {
+        background-position: center 1200px;
+    }
+}
+
+/*********************[메인]***************************/
+.main.ui {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    z-index: 999;
+    text-align: center;
+    padding: 10px;
+}
+
+.main .mainItems {
+    width: 100%;
+    max-width: 600px;
+    height: 300px;
+    margin: 0 auto;
+    margin-top: 70px;
+    background-size: 100%;
+    background-repeat: no-repeat;
+}
+.main .logo {
+    background-image: url(img/UI/Main_Menu/Header.png);
+}
+
+.main .bottom {
+    width: 100%;
+    max-width: 100%;
+    position: absolute;
+    bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.main .bottom .exit_btn,
+.main .bottom .start_btn {
+    width: 100%;
+    height: 100%;
+    background-size: calc(100% - 30px);
+    max-width: 400px;
+    background-repeat: no-repeat;
+    margin: 0 auto;
+}
+
+/*********************[게임]***************************/
+.gameUI {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+    font-size: 2em;
+}
+
+.gameUI .timer {
+    padding: 30px;
+}
+.gameUI .timer img {
+    width: 40px;
+    vertical-align: middle;
+}
+.gameUI .score {
+    padding: 30px;
+    position: absolute;
+    right: 0;
+}
+
+.game {
+    cursor: none;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+.game .meteor {
+    width: 10%;
+    position: fixed;
+    z-index: 1;
+}
+.game .ship {
+    width: 15%;
+    position: absolute;
+    bottom: 10px;
+    left: 45%;
+    z-index: 10;
+}
+.game .missile {
+    width: 5%;
+    position: fixed;
+    transition-property: top;
+    transition-duration: 1s;
+    transition-delay: 0.1s;
+    margin-left: 5%;
+    z-index: 1;
+}
+.game .missile.on {
+    top: -100% !important;
+}
