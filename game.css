@@ -122,17 +122,16 @@ body div.ui {
     width: 100%;
     height: 100%;
 }
-.game .meteor {
-    width: 10%;
-    position: fixed;
-    z-index: 1;
-}
+
 .game .ship {
     width: 15%;
     position: absolute;
     bottom: 10px;
     left: 45%;
     z-index: 10;
+}
+.game .missile.on {
+    top: -100% !important;
 }
 .game .missile {
     width: 5%;
@@ -143,6 +142,22 @@ body div.ui {
     margin-left: 5%;
     z-index: 1;
 }
-.game .missile.on {
-    top: -100% !important;
+.game .meteor {
+    width: 10%;
+    position: fixed;
+    top: -20%;
+    transition-property: top;
+    transition-duration: 4s;
+    transition-delay: 0.1s;
+    transition-timing-function: linear;
+    z-index: 1;
+}
+.game .meteor.on {
+    top: 120% !important;
+}
+.game .explosion{
+    width: 20%;
+    position: fixed;
+    margin-left: -10%;
+    z-index: 1;
 }
