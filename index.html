@@ -12,7 +12,21 @@
     <body>
         <div class="loading" id="loading">LOADING...</div>
         <div class="bg ui" id="bg"></div>
-        
+       
+        <!-- 메인화면 -->
+        <div class="main ui" id="main">
+            <div class="mainItems logo"></div>
+                <div class="mainItems bottom">
+                    <div class="start_btn cp" onclick="gameStart()">
+                        <img src="img/UI/Main_Menu/Start_BTN.png">
+                    </div>
+                    <div class="exit_btn cp" onclick="gameExit()">
+                        <img src="img/UI/Main_Menu/Exit_BTN.png">
+                    </div>
+                </div>
+        </div>
+
+
         <!-- 게임화면 -->
         <div class="gameUI ui" id="gameUI">
             <div class="score">score : 0</div>
@@ -21,25 +35,11 @@
                 100s
             </div>
         </div>
+        
         <div class="game ui" id="game">
-            <img src="">
             <img src="/img/game/ship/Ship.png" id="ship" class="ship" />
         </div>
-
        
-       <!-- 메인화면 -->
-        <div class="main ui" id="main">
-            <div class="mainItems logo"></div>
-                <div class="mainItems bottom">
-                    <div class="exit_btn cp" onclick="gameExit()">
-                        <img src="img/UI/Main_Menu/Exit_BTN.png">
-                    </div>
-                    <div class="start_btn cp" onclick="gameStart()">
-                        <img src="img/UI/Main_Menu/Start_BTN.png">
-                    </div>
-                </div>
-
-        </div>
         <script src="index.js"></script>
     </body>
 </html>
