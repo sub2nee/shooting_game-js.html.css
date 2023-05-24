@@ -23,12 +23,12 @@ body div.ui {
 
 /************************************************/
 .loading {
-    text-align: center;
+	text-align: center;
     position: absolute;
     top: 40%;
     width: 100%;
     font-size: 2.4em;
-}
+  }
 .bg {
     width: 100%;
     height: 999999%;
@@ -155,7 +155,7 @@ body div.ui {
 .game .meteor.on {
     top: 120% !important;
 }
-.game .explosion{
+.game .explosion {
     width: 20%;
     position: fixed;
     margin-left: -10%;
