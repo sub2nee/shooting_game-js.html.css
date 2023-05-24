@@ -16,26 +16,26 @@
         <!-- 메인화면 -->
         <div class="main ui" id="main">
             <div class="mainItems logo"></div>
-                <div class="mainItems bottom">
-                    <div class="start_btn cp" onclick="gameStart()">
-                        <img src="img/UI/Main_Menu/Start_BTN.png">
-                    </div>
-                    <div class="exit_btn cp" onclick="gameExit()">
-                        <img src="img/UI/Main_Menu/Exit_BTN.png">
-                    </div>
+            <div class="mainItems bottom">
+                <div class="start_btn cp" onclick="gameStart()">
+                    <img src="img/UI/Main_Menu/Start_BTN.png" />
                 </div>
+                <div class="exit_btn cp" onclick="gameExit()">
+                    <img src="img/UI/Main_Menu/Exit_BTN.png" />
+                </div>
+            </div>
         </div>
 
 
         <!-- 게임화면 -->
         <div class="gameUI ui" id="gameUI">
-            <div class="score">score : 0</div>
+            <div class="score">score : <span id="score">0</span></div>
             <div class="timer">
-                <img src="img/UI/Main_Menu/Clock_Icon.png" /> 
+                <img src="img/UI/Main_Menu/Clock_Icon.png" />
                 100s
             </div>
         </div>
-        
+
         <div class="game ui" id="game">
             <img src="/img/game/ship/Ship.png" id="ship" class="ship" />
         </div>

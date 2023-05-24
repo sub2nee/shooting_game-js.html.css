@@ -1,5 +1,5 @@
 /***  option  ***/
-let missileSpeed = 100; // ms높아질수록 느리게 나온다.
+let missileSpeed = 200; // ms높아질수록 느리게 나온다.
 let meteorSpeed = 900;
 let missileId = 0;
 let missileObj =
@@ -12,6 +12,8 @@ let explosionObj =
     '<img src="/img/game/missile/explosion.png" class="explosion" id="explosion_{x}">';
 /****************/
 
+let meteorHit = false;
+let score=0;
 let isGameStart = false;
 function gameStart() {
     $('body').css('cursor', 'none');
@@ -45,7 +47,6 @@ function missile() {
                 $('#missile_' + nowMissileId).remove();
             }, 1000);
         }, 0);
-
         missileId++;
     }
 }
@@ -86,6 +87,7 @@ function meteorAttack() {
             var meteorOffset = $(meteorArr[i]).offset();
             var meteorWidth = $(meteorArr[i]).width() / 2;
             var meteorHeight = $(meteorArr[i]).height() / 2;
+            
 
             for (let j = 0; j < missileArr.length; j++) {
                 var missileOffset = $(missileArr[j]).offset();
@@ -107,10 +109,7 @@ function meteorAttack() {
                         missileOffset.left <= windowWidth &&
                         missileOffset.top >= 0
                     ) {
-                        var newExplosion = explosionObj.replace(
-                            '{x}',
-                            explosionId
-                        );
+                        var newExplosion = explosionObj.replace('{x}', explosionId);
                         $('#game').append(newExplosion);
                         $('#explosion_' + explosionId).css({
                             left: missileOffset.left + 'px',
@@ -119,6 +118,8 @@ function meteorAttack() {
 
                         var nowExplosionId = explosionId;
                         explosionId++;
+                        score++;
+                        $('#score').text(score);
 
                         setTimeout(function () {
                             $('#explosion_' + nowExplosionId).remove();
@@ -127,12 +128,13 @@ function meteorAttack() {
                             }
                         }, 300);
                     }
+                    meteorHit = true;
+                    break;
                 }
             }
         }
     }
 }
-
 window.onload = init;
 function init() {
     if (window.Event) {
