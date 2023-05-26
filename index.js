@@ -1,7 +1,11 @@
+/**********************[ Option ]****************************/
 const backgroundMusic = new Audio('sound/mainTheme.mp3');
 const gameOverSound = new Audio('sound/gameOver.wav');
+const laserSound = new Audio('sound/laser.wav');
 let isGameStart = false;
 let isSpacePressed = false;
+let timer = 60;
+/************************************************************/
 
 function gameStart() {
     $('body').css('cursor', 'none');
@@ -11,17 +15,43 @@ function gameStart() {
     console.log('Game Start');
     backgroundMusic.play();
 }
-
 function gameEnd() {
-    $('body').css('cursor', 'normal');
+    $('#endUI').css('display', 'block');
+    $('#game,#gameUI').css('display', 'none');
     isGameStart = false;
     backgroundMusic.pause();
     gameOverSound.play();
+    $('#endScore').text(score);
+    $('#timer').text(timer);
+    openModal();
+}
+
+function reGame() {
+    //초기화 및 리셋
+    closeModal();
+    isGameStart = false;
+    backgroundMusic.currentTime = 0; // 음악을 처음으로 되감음
+    backgroundMusic.play();
+    $('#score').text(score);
+    $('#timer').text(timer);
+    score = 0;
+    timer = 60;
+    meteorArr = $('.meteor');
+    missileArr = $('.missile');
+    ship = $('#ship');
+
+    console.log('Game Replay');
 }
 function gameExit() {
     window.close();
 }
 
+function time() {
+    if (isGameStart) {
+        $('#timer').text(timer);
+        timer--;
+    }
+}
 /**********************************************************/
 
 let missileSpeed = 100; // ms높아질수록 느리게 나온다.
@@ -47,9 +77,8 @@ function missile() {
                 }, 1000);
             }, 1);
 
-            $('#laser').get(0).pause();
-            $('#laser').get(0).currentTime = 0;
-            $('#laser').get(0).play();
+            laserSound.currentTime = 0;
+            laserSound.play();
             missileId++;
         }
     }
@@ -92,11 +121,13 @@ function meteor() {
 
 let explosionId = 0;
 let explosionObj =
-    '<img src="/img/game/missile/explosion.png" class="explosion" id="explosion_{x}">';
-let meteorHit = false;
+'<img src="/img/game/missile/explosion.png" class="explosion" id="explosion_{x}">';
+let shipId = 0;
+let shipObj =
+'<img src="/img/game/missile/explosion.png" class="ship" id="ship_{x}">'
 let score = 0;
 
-function meteorAttack() {
+function attack() {
     if (isGameStart) {
         var meteorArr = $('.meteor');
         var missileArr = $('.missile');
@@ -114,10 +145,24 @@ function meteorAttack() {
                 ship.offset().top + ship.height() > meteorOffset.top &&
                 ship.offset().top < meteorOffset.top + meteorHeight
             ) {
-                // 충돌 발생 시 게임 오버 처리
+                var shipExplosion = explosionObj.
+                replace('{x}',
+                shipId
+                 );
+                $('#game').append(shipExplosion);
+                $('#explosion_'+ shipId).css({
+                    left: ship.offset().left + 'px',
+                    top: ship.offset().top + 'px',
+                });
+
+                setTimeout(function () {
+                    $('#explosion_'+shipId).remove();
+                    gameEnd(); // 모달 창 열기
+                }, 400);
+                expSound();
+
                 console.log('Game Over');
-                $('#ship').remove();
-                gameEnd();
+                $('#ship').css('display', 'none');
                 break;
             }
 
@@ -164,7 +209,6 @@ function meteorAttack() {
                         }, 300);
                         expSound();
                     }
-                    meteorHit = true;
                     break;
                 }
             }
@@ -197,9 +241,10 @@ function init() {
     }
     document.onmousemove = getCursorXY;
 
-    setInterval(meteorAttack, 1);
+    setInterval(attack, 1);
     setInterval(missile, missileSpeed);
     setInterval(meteor, meteorSpeed);
+    setInterval(time, 1000);
 }
 
 let cursorX = 0;
@@ -226,12 +271,6 @@ function getCursorXY(e) {
         });
     }
 }
-
-$(document).ready(function () {
-    $('#main,#bg').css('display', 'block');
-    $('#loading').remove();
-  });
-
 $(document).keydown(function (event) {
     if (event.keyCode === 32) {
         // 스페이스바 키 코드 32
@@ -244,3 +283,26 @@ $(document).keyup(function (event) {
         isSpacePressed = false; // 스페이스바가 떼어짐
     }
 });
+
+$(document).ready(function () {
+    $('#main,#bg').css('display', 'block');
+    $('#loading').remove();
+});
+
+function openModal() {
+    $('.modal').addClass('show');
+    $('body').css('overflow', 'hidden');
+    $('body').css(
+        'cursor',
+        "url('https://cur.cursors-4u.net/cursors/cur-8/cur736.png'),auto"
+    );
+
+    $('.start_btn').on('click', function () {
+        reGame();
+    });
+}
+
+function closeModal() {
+    $('.modal').removeClass('show');
+    $('body').css('overflow', 'hidden');
+}
