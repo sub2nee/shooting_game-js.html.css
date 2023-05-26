@@ -18,30 +18,48 @@ function gameStart() {
 function gameEnd() {
     $('#endUI').css('display', 'block');
     $('#game,#gameUI').css('display', 'none');
-    isGameStart = false;
-    backgroundMusic.pause();
-    gameOverSound.play();
     $('#endScore').text(score);
     $('#timer').text(timer);
+    isGameStart = false;
+    reOption();
+    backgroundMusic.pause();
+    gameOverSound.play();
     openModal();
 }
-
-function reGame() {
-    //초기화 및 리셋
-    closeModal();
-    isGameStart = false;
-    backgroundMusic.currentTime = 0; // 음악을 처음으로 되감음
-    backgroundMusic.play();
-    $('#score').text(score);
-    $('#timer').text(timer);
+function reOption() {
     score = 0;
     timer = 60;
-    meteorArr = $('.meteor');
-    missileArr = $('.missile');
-    ship = $('#ship');
-
-    console.log('Game Replay');
+    missileId = 0;
+    meteorId = 0;
+    shipId = 0;
+    expAudId = 0;
+    nowExplosionId = 0;
+    for (let i = 0; i < explosionId - 1; i++) {
+        $('#explosion_' + i).remove();
+    }
+    explosionId = 0;
+    isGameStart = false;
+    backgroundMusic.currentTime = 0;
 }
+
+
+function reGame() {
+    $('#main').css('display', 'block');
+    $('#ship').css('display', 'block');
+    $('#endUI').css('display', 'none');
+    $('#score').text(score);
+    $('#timer').text(timer);
+    reOption();
+    console.log('Replay ! Go Main');
+    closeModal();
+    if (!$('.start_btn').data('click-bound')) {
+        $('.start_btn').on('click', function () {
+            gameStart();
+        });
+        $('.start_btn').data('click-bound', true);
+    }
+}
+
 function gameExit() {
     window.close();
 }
@@ -121,10 +139,10 @@ function meteor() {
 
 let explosionId = 0;
 let explosionObj =
-'<img src="/img/game/missile/explosion.png" class="explosion" id="explosion_{x}">';
+    '<img src="/img/game/missile/explosion.png" class="explosion" id="explosion_{x}">';
 let shipId = 0;
 let shipObj =
-'<img src="/img/game/missile/explosion.png" class="ship" id="ship_{x}">'
+    '<img src="/img/game/missile/explosion.png" class="ship" id="ship_{x}">';
 let score = 0;
 
 function attack() {
@@ -145,18 +163,15 @@ function attack() {
                 ship.offset().top + ship.height() > meteorOffset.top &&
                 ship.offset().top < meteorOffset.top + meteorHeight
             ) {
-                var shipExplosion = explosionObj.
-                replace('{x}',
-                shipId
-                 );
+                var shipExplosion = explosionObj.replace('{x}', shipId);
                 $('#game').append(shipExplosion);
-                $('#explosion_'+ shipId).css({
+                $('#explosion_' + shipId).css({
                     left: ship.offset().left + 'px',
                     top: ship.offset().top + 'px',
                 });
 
                 setTimeout(function () {
-                    $('#explosion_'+shipId).remove();
+                    $('#explosion_' + shipId).removeClass('explosion');
                     gameEnd(); // 모달 창 열기
                 }, 400);
                 expSound();
@@ -296,10 +311,6 @@ function openModal() {
         'cursor',
         "url('https://cur.cursors-4u.net/cursors/cur-8/cur736.png'),auto"
     );
-
-    $('.start_btn').on('click', function () {
-        reGame();
-    });
 }
 
 function closeModal() {
