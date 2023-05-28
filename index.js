@@ -1,10 +1,15 @@
 /**********************[ Option ]****************************/
 const backgroundMusic = new Audio('sound/mainTheme.mp3');
 const gameOverSound = new Audio('sound/gameOver.wav');
+const bossThem = new Audio('sound/BossTheme.mp3');
+const warningSound = new Audio('sound/alarm.ogg');
 const laserSound = new Audio('sound/laser.wav');
 let isGameStart = false;
+let isBossDead = false;
 let isSpacePressed = false;
-let timer = 60;
+let timer = 120;
+let maxTimer = timer;
+let bossTimer = 10;
 /************************************************************/
 
 function gameStart() {
@@ -23,15 +28,17 @@ function gameEnd() {
     isGameStart = false;
     reOption();
     backgroundMusic.pause();
+    warningSound.pause();
+    bossThem.pause();
     gameOverSound.play();
     openModal();
 }
 function reOption() {
     score = 0;
-    timer = 60;
+    timer = 120;
     missileId = 0;
     meteorId = 0;
-    shipId = 0;
+    shipId = 1;
     expAudId = 0;
     nowExplosionId = 0;
     for (let i = 0; i < explosionId - 1; i++) {
@@ -40,8 +47,10 @@ function reOption() {
     explosionId = 0;
     isGameStart = false;
     backgroundMusic.currentTime = 0;
+    bossThem.currentTime = 0;
+    warningSound.currentTime = 0;
+    gameOverSound.currentTime = 0;
 }
-
 
 function reGame() {
     $('#main').css('display', 'block');
@@ -49,8 +58,6 @@ function reGame() {
     $('#endUI').css('display', 'none');
     $('#score').text(score);
     $('#timer').text(timer);
-    reOption();
-    console.log('Replay ! Go Main');
     closeModal();
     if (!$('.start_btn').data('click-bound')) {
         $('.start_btn').on('click', function () {
@@ -66,8 +73,27 @@ function gameExit() {
 
 function time() {
     if (isGameStart) {
+        if (maxTimer - (bossTimer - 5) == timer) {
+            $('.warn').css('display', 'block');
+            backgroundMusic.pause();
+            warningSound.loop = true;
+            warningSound.play();
+        }
+        if (maxTimer - bossTimer == timer) {
+            $('.warn').css('display', 'none');
+            $('#boss,#bossGauge').css('display', 'block');
+            warningSound.pause();
+            backgroundMusic.pause();
+            bossThem.play();
+        }
+        if (timer === 0) {
+            gameEnd();
+        }
         $('#timer').text(timer);
         timer--;
+    } else if (isBossDead) {
+        bossThem.pause();
+        backgroundMusic.play();
     }
 }
 /**********************************************************/
@@ -140,7 +166,7 @@ function meteor() {
 let explosionId = 0;
 let explosionObj =
     '<img src="/img/game/missile/explosion.png" class="explosion" id="explosion_{x}">';
-let shipId = 0;
+let shipId = 1;
 let shipObj =
     '<img src="/img/game/missile/explosion.png" class="ship" id="ship_{x}">';
 let score = 0;
@@ -150,13 +176,29 @@ function attack() {
         var meteorArr = $('.meteor');
         var missileArr = $('.missile');
         var ship = $('#ship');
+        var boss = $('#boss');
+
+        // 보스 위치 업데이트
+        function bossPosition() {
+            var bossOffset = $('#boss').offset();
+            $('#tri, #bossBeam').css({
+                left: bossOffset.left + 'px',
+                top: bossOffset.top + 'px',
+            });
+        }
+        bossPosition();
+
+        // 애니메이션 반복 시 보스 위치 업데이트
+        $('#boss').on('animationiteration', function () {
+            bossPosition();
+        });
 
         for (let i = 0; i < meteorArr.length; i++) {
             var meteorOffset = $(meteorArr[i]).offset();
             var meteorWidth = $(meteorArr[i]).width() / 2;
             var meteorHeight = $(meteorArr[i]).height() / 2;
 
-            // 충돌 검사
+            // 충돌 검사 (미사일, 보스)
             if (
                 ship.offset().left + ship.width() > meteorOffset.left &&
                 ship.offset().left < meteorOffset.left + meteorWidth &&
@@ -172,7 +214,7 @@ function attack() {
 
                 setTimeout(function () {
                     $('#explosion_' + shipId).removeClass('explosion');
-                    gameEnd(); // 모달 창 열기
+                    gameEnd();
                 }, 400);
                 expSound();
 

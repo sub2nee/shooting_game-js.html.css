@@ -12,7 +12,6 @@
     <body>
         <div class="loading" id="loading">LOADING...</div>
         <div class="bg ui" id="bg"></div>
-        
         <div class="modal">
             <div class="modal_body" id="modalbody">
                 <div class="endUI" id="endUI">
@@ -21,10 +20,10 @@
                             <span id="endScore">0</span>
                         </div>
                         <div class="btn play_btn" onclick="reGame()">
-                            <img src="img/UI/End_Menu/Play_BTN.png">
+                            <img src="img/UI/End_Menu/Play_BTN.png" />
                         </div>
                         <div class="btn close_btn" onclick="gameExit()">
-                            <img src="img/UI/End_Menu/Close_BTN.png">
+                            <img src="img/UI/End_Menu/Close_BTN.png" />
                         </div>
                     </div>
                 </div>
@@ -46,17 +45,30 @@
 
         <!-- 게임화면 -->
         <div class="gameUI ui" id="gameUI">
+            <div class="bossGauge" id="bossGauge">
+                <div class="bossGaugeBar"></div>
+            </div>
             <div class="score">score : <span id="score">0</span></div>
             <div class="timer">
                 <img src="img/UI/Main_Menu/Clock_Icon.png" />
-                <span id="timer">60</span>
+                <span id="timer">120</span>
             </div>
+            <div class="warningLayer">
+                <div class="line topLine waring warn"></div>
+                <div class="text warningText warn">WARNING</div>
+                <div class="line bottomLine waring warn"></div>
+                <div class="line topLine danger dan"></div>
+                <div class="text dangerText dan">DANGER</div>
+                <div class="line bottomLine danger dan"></div>
+            </div>
+            <img src="img/UI/Main_Menu/tri.png" class="tri" id="tri" />
         </div>
 
         <div class="game ui" id="game">
-            <img src="/img/game/ship/Ship.png" id="ship" class="ship" />
+            <img src="img/game/boss/boss1.png" id="boss" class="boss" />
+            <img src="img/game/boss/beam.png" id="bossBeam" class="bossBeam" />
+            <img src="img/game/ship/Ship.png" id="ship" class="ship" />
         </div>
-
         <script src="index.js"></script>
     </body>
 </html>

@@ -26,7 +26,7 @@ body div.ui {
     position: absolute;
     top: 40%;
     width: 100%;
-    font-size: 2.4rem;
+    font-size: 3rem;
 }
 .bg {
     width: 100%;
@@ -109,13 +109,13 @@ body div.ui {
     width: 100%;
     height: 100%;
     background-size: calc(100% - 30px);
-    max-width: 400px;
+    max-width: 405px;
     background-repeat: no-repeat;
     margin: 10px auto;
 }
 
 /*********************[게임]***************************/
-.gameUI{
+.gameUI {
     position: fixed;
     width: 100%;
     height: 100%;
@@ -135,7 +135,78 @@ body div.ui {
     position: absolute;
     right: 0;
 }
-
+.gameUI .warningLayer {
+    position: fixed;
+    z-index: 101;
+    width: 100%;
+    height: 100px;
+    top: 40%;
+}
+.gameUI .warningLayer .text {
+    font-size: 2.8em;
+    width: 100%;
+    text-align: center;
+    position: absolute;
+    margin-top: 2px;
+}
+.gameUI .warningLayer .warningText {
+    color: #ffd905;
+}
+.gameUI .warningLayer .dangerText {
+    color: #ff0018;
+}
+.gameUI .line {
+    position: absolute;
+    height: 25px;
+    width: 100%;
+}
+.gameUI .line.waring {
+    background-image: url(img/UI/Main_Menu/warning.png);
+}
+.gameUI .line.danger {
+    background-image: url(img/UI/Main_Menu/danger.png);
+}
+.gameUI .line.bottomLine {
+    margin-top: 86px;
+}
+.gameUI .warn,
+.gameUI .dan {
+    display: none;
+    animation: tri 1s linear infinite;
+}
+.gameUI .tri {
+    display: none;
+    width: 5%;
+    position: fixed;
+    margin-left: 18%;
+    margin-top: 22%;
+    animation: tri 0.6s linear infinite;
+}
+@keyframes tri {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+.gameUI .bossGauge{
+    display: none;
+    position: fixed;
+    z-index: 3;
+    width: 70%;
+    left: 15%;
+    margin-top: 14px;
+}
+.gameUI .bossGauge .bossGaugeBar{
+    width: 100%;
+    height: 13px;
+    background-image: url(img/game/boss/Boss_HP_Bar.png);
+    background-size: 100%;
+}
 .game {
     cursor: none;
     position: absolute;
@@ -167,7 +238,7 @@ body div.ui {
     position: fixed;
     top: -20%;
     transition-property: top;
-    transition-duration: 4s;
+    transition-duration: 2.5s;
     transition-delay: 0.1s;
     transition-timing-function: linear;
     z-index: 1;
@@ -175,13 +246,41 @@ body div.ui {
 .game .meteor.on {
     top: 120% !important;
 }
+
+.game .boss {
+    width: 18%;
+    top: 5%;
+    position: fixed;
+    z-index: 2;
+    animation: bossMove 10s linear infinite;
+    display: none;
+}
+@keyframes bossMove {
+    0% {
+        left: 0%;
+    }
+    50% {
+        left: 60%;
+    }
+    100% {
+        left: 0%;
+    }
+}
+.game .bossBeam {
+    width: 10%;
+    position: fixed;
+    height: 100%;
+    margin-left: 8.4%;
+    margin-top: 5%;
+    display: none;
+}
 .game .explosion {
     width: 20%;
     position: fixed;
     margin-left: -10%;
     z-index: 1;
 }
-.endScore{
+.endScore {
     position: absolute;
     top: -30%;
     left: 52%;
