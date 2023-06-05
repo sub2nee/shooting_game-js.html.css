@@ -215,7 +215,7 @@ body div.ui {
 }
 
 .game .ship {
-    width: 15%;
+    width: 10%;
     position: absolute;
     bottom: 10px;
     left: 45%;
@@ -234,11 +234,11 @@ body div.ui {
     z-index: 1;
 }
 .game .meteor {
-    width: 10%;
+    width: 8%;
     position: fixed;
     top: -20%;
     transition-property: top;
-    transition-duration: 2.5s;
+    transition-duration: 3.5s;
     transition-delay: 0.1s;
     transition-timing-function: linear;
     z-index: 1;
@@ -248,8 +248,7 @@ body div.ui {
 }
 
 .game .boss {
-    width: 18%;
-    top: 5%;
+    width: 25%;
     position: fixed;
     z-index: 2;
     animation: bossMove 10s linear infinite;
@@ -260,7 +259,7 @@ body div.ui {
         left: 0%;
     }
     50% {
-        left: 60%;
+        left: 80%;
     }
     100% {
         left: 0%;

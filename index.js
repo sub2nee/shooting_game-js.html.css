@@ -2,15 +2,23 @@
 const backgroundMusic = new Audio('sound/mainTheme.mp3');
 const gameOverSound = new Audio('sound/gameOver.wav');
 const bossThem = new Audio('sound/BossTheme.mp3');
+const bossDeathSound = new Audio('sound/BossDeath.wav');
 const warningSound = new Audio('sound/alarm.ogg');
 const laserSound = new Audio('sound/laser.wav');
-let isGameStart = false;
-let isBossDead = false;
-let isSpacePressed = false;
-let timer = 120;
-let maxTimer = timer;
-let bossTimer = 10;
 /************************************************************/
+let isGameStart = false;
+let isSpacePressed = false;
+let basicTimer = 120; //게임시간
+let timer = basicTimer;
+let maxTimer = timer;
+///////[보스 기본설정]/////////////
+let isBoss = false;
+let bossTimer = 10;
+let damage = 1;
+let bossNum = 1;
+let basicBossHp = 30;
+let bossHp = basicBossHp;
+////////////////////////////////
 
 function gameStart() {
     $('body').css('cursor', 'none');
@@ -22,11 +30,9 @@ function gameStart() {
 }
 function gameEnd() {
     $('#endUI').css('display', 'block');
-    $('#game,#gameUI').css('display', 'none');
-    $('#endScore').text(score);
-    $('#timer').text(timer);
-    isGameStart = false;
+    $('#game,#gameUI,#boss,#bossGauge').css('display', 'none');
     reOption();
+    backgroundMusic.currentTime = 0;
     backgroundMusic.pause();
     warningSound.pause();
     bossThem.pause();
@@ -34,37 +40,39 @@ function gameEnd() {
     openModal();
 }
 function reOption() {
+    isGameStart = false;
+    isBoss = false;
     score = 0;
-    timer = 120;
+    for (let i = 0; i < explosionId; i++) {
+        $('.explosion_' + i).remove();
+    }
+    shipId = 1;
     missileId = 0;
     meteorId = 0;
-    shipId = 1;
     expAudId = 0;
-    nowExplosionId = 0;
-    for (let i = 0; i < explosionId - 1; i++) {
-        $('#explosion_' + i).remove();
-    }
     explosionId = 0;
-    isGameStart = false;
-    backgroundMusic.currentTime = 0;
-    bossThem.currentTime = 0;
-    warningSound.currentTime = 0;
-    gameOverSound.currentTime = 0;
+    timer = basicTimer;
+    maxTimer = timer;
+    bossNum = 1;
+    bossHp = basicBossHp;
+    bossGaugeBar();
+    $('#score').text(score);
+    $('#timer').text(timer);
 }
 
 function reGame() {
     $('#main').css('display', 'block');
     $('#ship').css('display', 'block');
     $('#endUI').css('display', 'none');
-    $('#score').text(score);
-    $('#timer').text(timer);
     closeModal();
+    reOption();
     if (!$('.start_btn').data('click-bound')) {
         $('.start_btn').on('click', function () {
             gameStart();
         });
         $('.start_btn').data('click-bound', true);
     }
+    console.log('Go main menu and restart');
 }
 
 function gameExit() {
@@ -75,29 +83,28 @@ function time() {
     if (isGameStart) {
         if (maxTimer - (bossTimer - 5) == timer) {
             $('.warn').css('display', 'block');
+            bossHp = basicBossHp * bossNum;
             backgroundMusic.pause();
             warningSound.loop = true;
             warningSound.play();
         }
         if (maxTimer - bossTimer == timer) {
+            isBoss = true;
             $('.warn').css('display', 'none');
-            $('#boss,#bossGauge').css('display', 'block');
+            $('#bossGauge,#boss').css('display', 'block');
             warningSound.pause();
             backgroundMusic.pause();
             bossThem.play();
         }
+
         if (timer === 0) {
             gameEnd();
         }
         $('#timer').text(timer);
         timer--;
-    } else if (isBossDead) {
-        bossThem.pause();
-        backgroundMusic.play();
     }
 }
 /**********************************************************/
-
 let missileSpeed = 100; // ms높아질수록 느리게 나온다.
 let missileId = 0;
 let missileObj =
@@ -130,18 +137,25 @@ function missile() {
 
 /**********************************************************/
 
-let meteorSpeed = 900;
+let meteorSpeed = 500;
 let meteorId = 0;
+let meteorArr = [];
 let meteorObj =
-    '<img src="/img/game/meteor/meteor.gif" class="meteor" id="meteor_{x}">';
+    '<img src="/img/game/meteor/meteor{num}.png" class="meteor" id="meteor_{x}">';
 
 function getRandomPos(min, max) {
-    return Math.random() * (max - min) + min;
+    return Math.floor(Math.random() * (max - min) + 1) + min;
 }
-
+function fileZero(width, str) {
+    str = String(str);
+    return str.length >= width
+        ? str
+        : new Array(width - str.length).join('0') + str;
+}
 function meteor() {
     if (isGameStart) {
         var newMeteor = meteorObj.replace('{x}', meteorId);
+        newMeteor = newMeteor.replace('{num}', fileZero(1, getRandomPos(0, 6)));
         $('#game').append(newMeteor);
         var nowMeteorId = meteorId;
 
@@ -178,33 +192,21 @@ function attack() {
         var ship = $('#ship');
         var boss = $('#boss');
 
-        // 보스 위치 업데이트
-        function bossPosition() {
-            var bossOffset = $('#boss').offset();
-            $('#tri, #bossBeam').css({
-                left: bossOffset.left + 'px',
-                top: bossOffset.top + 'px',
-            });
-        }
-        bossPosition();
-
-        // 애니메이션 반복 시 보스 위치 업데이트
-        $('#boss').on('animationiteration', function () {
-            bossPosition();
-        });
-
         for (let i = 0; i < meteorArr.length; i++) {
+            //메테오와 플레이어 충돌체크
+            var meteorWidth = $(meteorArr[i]).width();
             var meteorOffset = $(meteorArr[i]).offset();
-            var meteorWidth = $(meteorArr[i]).width() / 2;
-            var meteorHeight = $(meteorArr[i]).height() / 2;
-
-            // 충돌 검사 (미사일, 보스)
+            var shipOffset = ship.offset();
             if (
-                ship.offset().left + ship.width() > meteorOffset.left &&
-                ship.offset().left < meteorOffset.left + meteorWidth &&
-                ship.offset().top + ship.height() > meteorOffset.top &&
-                ship.offset().top < meteorOffset.top + meteorHeight
+                shipOffset.left > meteorOffset.left - meteorWidth &&
+                shipOffset.left < meteorOffset.left + meteorWidth &&
+                shipOffset.top > meteorOffset.top - meteorWidth &&
+                shipOffset.top < meteorOffset.top + meteorWidth
             ) {
+                $(meteorArr[i]).remove();
+
+                console.log(shipOffset.left, shipOffset.top);
+
                 var shipExplosion = explosionObj.replace('{x}', shipId);
                 $('#game').append(shipExplosion);
                 $('#explosion_' + shipId).css({
@@ -213,34 +215,32 @@ function attack() {
                 });
 
                 setTimeout(function () {
-                    $('#explosion_' + shipId).removeClass('explosion');
+                    $('#explosion_' + shipId).remove();
+                    for (let i = 0; i < shipExplosion - 1; i++) {
+                        $('#explosion_' + i).remove();
+                    }
                     gameEnd();
-                }, 400);
+                }, 200);
+                $('#ship').css('display', 'none');
                 expSound();
 
                 console.log('Game Over');
-                $('#ship').css('display', 'none');
-                break;
             }
 
             for (let j = 0; j < missileArr.length; j++) {
+                //미사일,메테오 충돌체크
                 var missileOffset = $(missileArr[j]).offset();
-                var missileWidth = $(missileArr[j]).width();
-                var missileHeight = $(missileArr[j]).height();
-                var windowWidth = $(window).width();
-
                 if (
-                    missileOffset.left + missileWidth > meteorOffset.left &&
+                    missileOffset.left > meteorOffset.left &&
                     missileOffset.left < meteorOffset.left + meteorWidth &&
-                    missileOffset.top + missileHeight > meteorOffset.top &&
-                    missileOffset.top < meteorOffset.top + meteorHeight
+                    missileOffset.top > meteorOffset.top - meteorWidth &&
+                    missileOffset.top < meteorOffset.top
                 ) {
                     $(meteorArr[i]).remove();
                     $(missileArr[j]).remove();
-
                     if (
                         missileOffset.left >= 0 &&
-                        missileOffset.left <= windowWidth &&
+                        missileOffset.left <= $(window).width() &&
                         missileOffset.top >= 0
                     ) {
                         var newExplosion = explosionObj.replace(
@@ -263,28 +263,119 @@ function attack() {
                             for (let i = 0; i < nowExplosionId - 1; i++) {
                                 $('#explosion_' + i).remove();
                             }
-                        }, 300);
+                        }, 200);
                         expSound();
                     }
-                    break;
+                }
+            }
+        }
+        if (isBoss) {
+            for (let j = 0; j < missileArr.length; j++) {
+                //미사일, 보스 충돌체크
+                var missileOffset = $(missileArr[j]).offset();
+                if (
+                    missileOffset.left > boss.offset().left &&
+                    missileOffset.left < boss.offset().left + boss.width() &&
+                    missileOffset.top > boss.offset().top &&
+                    missileOffset.top < boss.offset().top + boss.width() / 2
+                ) {
+                    $(missileArr[j]).remove();
+                    bossHp -= damage;
+                    if (bossHp == 0) {
+                        bossDead();
+                    }
+                    if (
+                        missileOffset.left >= 0 &&
+                        missileOffset.left <= $(window).width() &&
+                        missileOffset.top >= 0
+                    ) {
+                        var newExplosion = explosionObj.replace(
+                            '{x}',
+                            explosionId
+                        );
+                        $('#game').append(newExplosion);
+                        $('#explosion_' + explosionId).css({
+                            left: missileOffset.left + 'px',
+                            top: missileOffset.top + 'px',
+                        });
+
+                        var nowExplosionId = explosionId;
+                        explosionId++;
+
+                        setTimeout(function () {
+                            $('#explosion_' + nowExplosionId).remove();
+                            for (let i = 0; i < nowExplosionId - 1; i++) {
+                                $('#explosion_' + i).remove();
+                            }
+                        }, 200);
+
+                        setInterval(function () {
+                            $('#tri').css('left', boss.offset().left + 'px');
+                            $('#bossBeam').css(
+                                'left',
+                                boss.offset().left + 'px'
+                            );
+                        }, 1);
+
+                        expSound();
+                        bossGaugeBar();
+                    }
                 }
             }
         }
     }
 }
 
+function bossGaugeBar() {
+    // console.log(bossHp * (100 / (basicBossHp * bossNum)));
+    $('#bossGaugeBar').css(
+        'width',
+        bossHp * (100 / (basicBossHp * bossNum)) + '%'
+    );
+}
+
+function bossDead() {
+    score += bossNum * 50; //보스 죽으면 +50점
+    bossNum++;
+    isBoss = false;
+    $('#boss,#bossGauge').css('display', 'none');
+    bossThem.pause();
+    bossDeathSound.play();
+    timer += 60;
+    maxTimer = timer;
+
+    $('#score').text(score);
+
+    setTimeout(function () {
+        backgroundMusic.currentTime = 0;
+        backgroundMusic.play();
+    }, 2000);
+
+    if (bossNum <= 10) {
+        //다음 보스가 있는경우
+        bossThem.currentTime = 0;
+        $('#boss').attr('src', 'img/game/boss/bosses/' + bossNum + '.png');
+        bossHp = basicBossHp * bossNum;
+        
+    } else {
+        //마지막 보스 물리친 경우
+        gameEnd();
+    }
+}
+
 let expAudId = 0;
-let expAudio = '<audio src="/sound/explosion.ogg" id="expaud_{x}"></audio>';
+let expAudio = '<audio src="/sound/explosion.ogg" id="expAud_{x}"></audio>';
 function expSound() {
     var newExpAud = expAudio.replace('{x}', expAudId);
     var newAudId = expAudId;
     $('body').append(newExpAud);
-    $('#expaud_' + newAudId)
-        .get(0)
-        .play();
+
+    var audioElement = document.getElementById('expAud_' + newAudId);
+    audioElement.volume = 0.5;
+    audioElement.play();
 
     setTimeout(function () {
-        $('#expaud_' + newAudId).remove();
+        $('#expAud_' + newAudId).remove();
     }, 2000);
     expAudId++;
 }
