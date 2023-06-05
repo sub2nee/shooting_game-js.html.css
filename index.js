@@ -1,24 +1,30 @@
 /**********************[ Option ]****************************/
 const backgroundMusic = new Audio('sound/mainTheme.mp3');
-const gameOverSound = new Audio('sound/gameOver.wav');
 const bossThem = new Audio('sound/BossTheme.mp3');
-const bossDeathSound = new Audio('sound/BossDeath.wav');
-const warningSound = new Audio('sound/alarm.ogg');
+const warningSound = new Audio('sound/warning_alarm.ogg');
+const dangerSound = new Audio('sound/danger_alarm.mp3');
 const laserSound = new Audio('sound/laser.wav');
+const bossLaserSound = new Audio('sound/BossLaser.wav');
+const gameOverSound = new Audio('sound/gameOver.wav');
+const bossDeathSound = new Audio('sound/BossDeath.wav');
 /************************************************************/
 let isGameStart = false;
 let isSpacePressed = false;
 let basicTimer = 120; //게임시간
 let timer = basicTimer;
 let maxTimer = timer;
-///////[보스 기본설정]/////////////
+/**********[보스 기본설정]**********/
 let isBoss = false;
-let bossTimer = 10;
-let damage = 1;
+let bossTimer = 20; //보스 출현시간
+let damage = 1; //플레이어의 기본 데미지
 let bossNum = 1;
-let basicBossHp = 30;
-let bossHp = basicBossHp;
-////////////////////////////////
+let basicBossHp = 20;
+let bossHp = basicBossHp; //보스 기본 체력
+let beamTimer = 8; //보스 공격나오는 시간
+let beamTimerDelay = 5; //빔 유지시간
+let nextBeamTime = beamTimer;
+let isBeam = false;
+/**********************************/
 
 function gameStart() {
     $('body').css('cursor', 'none');
@@ -28,18 +34,9 @@ function gameStart() {
     console.log('Game Start');
     backgroundMusic.play();
 }
-function gameEnd() {
-    $('#endUI').css('display', 'block');
-    $('#game,#gameUI,#boss,#bossGauge').css('display', 'none');
-    reOption();
-    backgroundMusic.currentTime = 0;
-    backgroundMusic.pause();
-    warningSound.pause();
-    bossThem.pause();
-    gameOverSound.play();
-    openModal();
-}
+
 function reOption() {
+    $('#game,#gameUI,#boss,#bossGauge,.warn,.dan').css('display', 'none');
     isGameStart = false;
     isBoss = false;
     score = 0;
@@ -55,9 +52,24 @@ function reOption() {
     maxTimer = timer;
     bossNum = 1;
     bossHp = basicBossHp;
+    nextBeamTime = beamTimer;
     bossGaugeBar();
-    $('#score').text(score);
     $('#timer').text(timer);
+    backgroundMusic.pause();
+    bossThem.pause();
+    warningSound.pause();
+    beamOff();
+    isBeam = false;
+    $('#score').text(score);
+}
+
+function gameEnd() {
+    $('#endScore').text(score);
+    $('#endUI').css('display', 'block');
+    reOption();
+    backgroundMusic.currentTime = 0;
+    gameOverSound.play();
+    openModal();
 }
 
 function reGame() {
@@ -83,8 +95,13 @@ function time() {
     if (isGameStart) {
         if (maxTimer - (bossTimer - 5) == timer) {
             $('.warn').css('display', 'block');
+            $('#boss').attr('src', 'img/game/boss/bosses/' + bossNum + '.png');
             bossHp = basicBossHp * bossNum;
+
             backgroundMusic.pause();
+            dangerSound.pause();
+            bossThem.pause();
+
             warningSound.loop = true;
             warningSound.play();
         }
@@ -93,11 +110,34 @@ function time() {
             $('.warn').css('display', 'none');
             $('#bossGauge,#boss').css('display', 'block');
             warningSound.pause();
+            dangerSound.pause();
             backgroundMusic.pause();
+            bossThem.currentTime = 0;
             bossThem.play();
+            bossThem.volume = 0.7;
+        }
+        if (isBoss) {
+            if (beamTimer - 3 == nextBeamTime) {
+                $('.dan,#tri').css('display', 'block');
+                warningSound.pause();
+
+                dangerSound.loop = true;
+                dangerSound.volume = 0.5;
+                dangerSound.play();
+            }
+            if (nextBeamTime == 0) {
+                beamOn();
+                dangerSound.pause();
+            }
+            nextBeamTime--;
         }
 
         if (timer === 0) {
+            gameEnd();
+        } else if (bossNum >= 10) {
+            var modalBody = $('.modal_body');
+            modalBody.css('background-image', 'url(img/UI/End_Menu/winModal.png)');
+            $('body').append(modalBody);
             gameEnd();
         }
         $('#timer').text(timer);
@@ -137,7 +177,7 @@ function missile() {
 
 /**********************************************************/
 
-let meteorSpeed = 500;
+let meteorSpeed = 300;
 let meteorId = 0;
 let meteorArr = [];
 let meteorObj =
@@ -223,7 +263,6 @@ function attack() {
                 }, 200);
                 $('#ship').css('display', 'none');
                 expSound();
-
                 console.log('Game Over');
             }
 
@@ -270,6 +309,33 @@ function attack() {
             }
         }
         if (isBoss) {
+            if (isBeam) {
+                var beamOffset = $('#bossBeam').offset();
+                var beamWidth = $('#bossBeam').width();
+                if (
+                    shipOffset.left > beamOffset.left &&
+                    shipOffset.left < beamOffset.left + beamWidth
+                ) {
+                    var shipExplosion = explosionObj.replace('{x}', shipId);
+                    $('#game').append(shipExplosion);
+                    $('#explosion_' + shipId).css({
+                        left: ship.offset().left + 'px',
+                        top: ship.offset().top + 'px',
+                    });
+
+                    setTimeout(function () {
+                        $('#explosion_' + shipId).remove();
+                        for (let i = 0; i < shipExplosion - 1; i++) {
+                            $('#explosion_' + i).remove();
+                        }
+                        gameEnd();
+                    }, 200);
+                    $('#ship').css('display', 'none');
+                    expSound();
+                    console.log('Game Over');
+                }
+            }
+
             for (let j = 0; j < missileArr.length; j++) {
                 //미사일, 보스 충돌체크
                 var missileOffset = $(missileArr[j]).offset();
@@ -326,8 +392,27 @@ function attack() {
     }
 }
 
+function beamOn() {
+    isBeam = true;
+    $('.dan,#tri').css('display', 'none');
+    nextBeamTime = beamTimer + beamTimerDelay;
+    $('#bossBeam').css('display', 'block');
+    setTimeout(beamOff, beamTimerDelay * 1000);
+    bossThem.volume = 0.5;
+    bossLaserSound.currentTime = 0;
+    bossLaserSound.play();
+}
+
+function beamOff() {
+    isBeam = false;
+    nextBeamTime = beamTimer;
+    $('#bossBeam').css('display', 'none');
+    $('.dan,#tri').css('display', 'none');
+    dangerSound.pause();
+    bossThem.volume = 1;
+}
 function bossGaugeBar() {
-    // console.log(bossHp * (100 / (basicBossHp * bossNum)));
+    console.log(bossHp * (100 / (basicBossHp * bossNum)));
     $('#bossGaugeBar').css(
         'width',
         bossHp * (100 / (basicBossHp * bossNum)) + '%'
@@ -335,32 +420,22 @@ function bossGaugeBar() {
 }
 
 function bossDead() {
+    isBoss = false;
+    beamOff();
     score += bossNum * 50; //보스 죽으면 +50점
     bossNum++;
-    isBoss = false;
     $('#boss,#bossGauge').css('display', 'none');
+    bossThem.currentTime = 0;
     bossThem.pause();
     bossDeathSound.play();
     timer += 60;
     maxTimer = timer;
-
     $('#score').text(score);
 
     setTimeout(function () {
         backgroundMusic.currentTime = 0;
         backgroundMusic.play();
-    }, 2000);
-
-    if (bossNum <= 10) {
-        //다음 보스가 있는경우
-        bossThem.currentTime = 0;
-        $('#boss').attr('src', 'img/game/boss/bosses/' + bossNum + '.png');
-        bossHp = basicBossHp * bossNum;
-        
-    } else {
-        //마지막 보스 물리친 경우
-        gameEnd();
-    }
+    }, 3000);
 }
 
 let expAudId = 0;

@@ -230,7 +230,7 @@ body div.ui {
     transition-property: top;
     transition-duration: 1s;
     transition-delay: 0.1s;
-    margin-left: 5%;
+    margin-left: 2%;
     z-index: 1;
 }
 .game .meteor {
@@ -270,7 +270,7 @@ body div.ui {
     position: fixed;
     height: 100%;
     margin-left: 8.4%;
-    margin-top: 5%;
+    margin-top: 10%;
     display: none;
 }
 .game .explosion {
