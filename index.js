@@ -85,6 +85,7 @@ function reGame() {
         $('.start_btn').data('click-bound', true);
     }
     console.log('Go main menu and restart');
+    $('#endScore').text(score);
 }
 
 function gameExit() {
